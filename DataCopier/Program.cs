@@ -3,6 +3,7 @@ using System.Data.SqlClient;
 using System.IO;
 using Azure.Storage.Blobs;
 using Azure.Data.Tables;
+using Microsoft.Extensions.Configuration;
 
 namespace DataCopier
 {
@@ -10,8 +11,15 @@ namespace DataCopier
     {
         static void Main(string[] args)
         {
-            string connectionString = "Data Source=(localdb)\\ProjectModels;Initial Catalog=FileDataDb;Integrated Security=True;Connect Timeout=30;Encrypt=False";
-            string storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=poblobtestsa;AccountKey=78iUr700ECEnJQKtW4q4kVsxsSkkzjlC6q8IcNuzuixT84IVPxKuUu27kRByb50x/IktwS8D3rtO+AStGQngKQ==;EndpointSuffix=core.windows.net";
+            // Build configuration
+            var builder = new ConfigurationBuilder()
+                .AddUserSecrets<Program>();
+            var configuration = builder.Build();
+
+            // Get the connection string from secrets
+            string storageConnectionString = configuration["AzureStorageConnectionString"];
+
+            string connectionString = "Data Source=(localdb)\\ProjectModels;Initial Catalog=FileDataDb;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
             string tableName = "FilesTable";
             string blobContainerName = "fileuploads";
 
@@ -19,6 +27,7 @@ namespace DataCopier
             var tableClient = serviceClient.GetTableClient(tableName);
             var blobServiceClient = new BlobServiceClient(storageConnectionString);
             var blobContainerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
+
 
             tableClient.CreateIfNotExists();
             blobContainerClient.CreateIfNotExists();
