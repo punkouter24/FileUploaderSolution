@@ -13,34 +13,15 @@ namespace DataCopier
     {
         static void Main(string[] args)
         {
-            // Get the Azure Key Vault URL from an environment variable or configuration
-            string keyVaultUrl = Environment.GetEnvironmentVariable("KEY_VAULT_URL") ?? "https://poblobtestkv.vault.azure.net/";
+            //// Get the Azure Key Vault URL from an environment variable or configuration
+            //string keyVaultUrl = Environment.GetEnvironmentVariable("KEY_VAULT_URL") ?? "https://poblobtestkv.vault.azure.net/";
 
-            // Create a SecretClient using DefaultAzureCredential
-            var client = new SecretClient(new Uri(keyVaultUrl), new DefaultAzureCredential());
+            //// Create a SecretClient using DefaultAzureCredential
+            //var client = new SecretClient(new Uri(keyVaultUrl), new DefaultAzureCredential());
 
-            // Retrieve the secret from Key Vault
-            KeyVaultSecret secret = client.GetSecret("AzureStorageConnectionString");
-            string storageConnectionString = secret.Value;
-
-            string connectionString = "Data Source=(localdb)\\ProjectModels;Initial Catalog=FileDataDb;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
-            string tableName = "FilesTable";
-            string blobContainerName = "fileuploads";
-
-            var serviceClient = new TableServiceClient(storageConnectionString);
-            var tableClient = serviceClient.GetTableClient(tableName);
-            var blobServiceClient = new BlobServiceClient(storageConnectionString);
-            var blobContainerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
-
-
-
-            //// Build configuration
-            //var builder = new ConfigurationBuilder()
-            //    .AddUserSecrets<Program>();
-            //var configuration = builder.Build();
-
-            //// Get the connection string from secrets
-            //string storageConnectionString = configuration["AzureStorageConnectionString"];
+            //// Retrieve the secret from Key Vault
+            //KeyVaultSecret secret = client.GetSecret("AzureStorageConnectionString");
+            //string storageConnectionString = secret.Value;
 
             //string connectionString = "Data Source=(localdb)\\ProjectModels;Initial Catalog=FileDataDb;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
             //string tableName = "FilesTable";
@@ -50,6 +31,25 @@ namespace DataCopier
             //var tableClient = serviceClient.GetTableClient(tableName);
             //var blobServiceClient = new BlobServiceClient(storageConnectionString);
             //var blobContainerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
+
+
+
+            // Build configuration
+            var builder = new ConfigurationBuilder()
+                .AddUserSecrets<Program>();
+            var configuration = builder.Build();
+
+            // Get the connection string from secrets
+            string storageConnectionString = configuration["AzureStorageConnectionString"];
+
+            string connectionString = "Data Source=(localdb)\\ProjectModels;Initial Catalog=FileDataDb;Integrated Security=True;Connect Timeout=30;Encrypt=False";
+            string tableName = "FilesTable";
+            string blobContainerName = "fileuploads";
+
+            var serviceClient = new TableServiceClient(storageConnectionString);
+            var tableClient = serviceClient.GetTableClient(tableName);
+            var blobServiceClient = new BlobServiceClient(storageConnectionString);
+            var blobContainerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
 
 
             tableClient.CreateIfNotExists();
